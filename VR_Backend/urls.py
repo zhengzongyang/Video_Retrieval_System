@@ -19,6 +19,9 @@ from VR_APP import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.caption_query),
     path('query/', views.query),
-    path('upload/', views.upload_file)
+    path('upload/', views.upload_file),
+    path('download/<str:file_name>', views.file_download),
+    path('test_caption/',views.test_caption_query)
 ]

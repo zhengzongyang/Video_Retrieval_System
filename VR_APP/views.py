@@ -2,25 +2,18 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from VR_APP.service.video_service import VideoService
-from VR_Backend.settings import config, video_db, UPLOAD_PATH
+from VR_Backend.settings import config, video_db, UPLOAD_PATH, BASE_DIR
 import json
 import os
+from django.http import HttpResponse, Http404, FileResponse
 
-def query(request):
-    if request.method == 'POST':
-        request_str = request.body
-        request_json = json.loads(request_str)
-        print('request infomation:',request_json)
-        caption = request_json["caption"]
-        # 验证caption是否为空
-        if caption != None and caption.strip() != "":
-            # 构建视频服务
-            video_service = VideoService()
-            recommend_list = video_service.text2video_query(caption, video_db)
-        recommend = {"recommend_list": recommend_list}
-        return HttpResponse(json.dumps(recommend, indent=4, ensure_ascii=False))
+video_service = VideoService()
 
+# text to video请求处理
+def caption_query(request):
+    return render(request, 'VR_APP/caption_query.html')
 
+# video to video 请求处理+视图显示
 def upload_file(request):
     if request.method == "POST":
         print("进入上传文件视图")
@@ -44,11 +37,51 @@ def upload_file(request):
                     for chunk in file.chunks():
                         f.write(chunk)
 
-                video_service = VideoService()
+                # video_service = VideoService()
                 recommend_list = video_service.video2video_query(file_name, video_db)
                 recommend = {"recommend_list": recommend_list}
-                return HttpResponse(json.dumps(recommend, indent=4, ensure_ascii=False))
+                # return HttpResponse(json.dumps(recommend, indent=4, ensure_ascii=False))
+                return render(request, 'VR_APP/result.html', recommend)
             else:
                 return HttpResponse("上传文件格式错误")
     else:
         return HttpResponse(render(request, 'VR_APP/upload.html'))
+
+# 视图显示
+def query(request):
+    if request.method == 'POST':
+        # request的POST方法获取表单的数据对象
+        data = request.POST
+        caption = data.get('caption')
+        # 验证caption是否为空
+        if caption != None and caption.strip() != "":
+            # 构建视频服务
+            # video_service = VideoService()
+            recommend_list = video_service.text2video_query(caption, video_db)
+        recommend = {"recommend_list": recommend_list}
+        # return HttpResponse(json.dumps(recommend, indent=4, ensure_ascii=False))
+        return render(request, 'VR_APP/result.html', recommend)
+
+
+def file_download(request, file_name):
+    try:
+        print(file_name)
+        file_path = "/root/dataset/data/MSRVTT_Videos/" + file_name + ".mp4"
+        response = FileResponse(open(file_path, 'rb'))
+        response['content_type'] = "application/octet-stream"
+        response['Content-Disposition'] = 'attachment; filename=' + file_name + '.mp4'
+        return response
+    except Exception:
+        raise Http404
+
+
+def test_caption_query(request):
+    if request.method == "POST":
+        request_json = json.loads(request.body)
+        print(request.json)
+        caption = request_json.get("caption")
+        if caption != None and caption.strip() != "":
+            recommend_list = video_service.text2video_query(caption, video_db)
+            
+    return HttpResponse("ok")
+    

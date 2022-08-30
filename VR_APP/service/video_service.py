@@ -5,11 +5,17 @@ from VR_APP.service.dataloader import Text_DataLoader,Visual_DataLoader
 from VR_APP.preload import tokenizer, encoder, args
 from VR_Backend.settings import config, UPLOAD_PATH
 from VR_APP.dao.Videosql import Videosql
+import faiss
 
 
 
 class VideoService():
     def __init__(self) -> None:
+        self.index = faiss.IndexFlatIP(512)
+        with Videosql(config['videobase']) as videosql:
+            # 建立索引
+            self.index.add(videosql.get_all_feature())
+            print("video.index.ntotal:%d" % self.index.ntotal)
         pass
 
     def get_video(self, video_path, max_frames, frame_rate=2):
@@ -113,12 +119,25 @@ class VideoService():
             
         return result
 
+    def match_faiss(self, feature, rank):
+        D, I = self.index.search(feature, rank)
+        query_index_list = I[:rank][0] + 1
+        print("faiss_index.....")
+        # 根据查出来的视频索引信息，去数据库中查对应的视频信息
+        with Videosql(config['videobase']) as videosql:
+            result = videosql.query_list_data(query_index_list)
+        
+        return result
+        
+
     def text2video_query(self, caption, video_db, rank=5):
         # 获取文本编码器
         text_encoder = encoder
         text_feat = self.get_overall_text_feature(text_encoder, tokenizer, caption)
-        result = self.match(text_feat, video_db, rank)
+        # result = self.match(text_feat, video_db, rank)
+        result = self.match_faiss(text_feat, rank)
         return result
+
 
     def video2video_query(self, file_name, video_db, rank=5):
         visual_encoder = encoder

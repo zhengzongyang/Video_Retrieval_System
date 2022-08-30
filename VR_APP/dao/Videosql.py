@@ -58,13 +58,13 @@ class Videosql():
         sql = "SELECT `video_feat` FROM %s" %(self.datatable)
         self.cursor.execute(sql)
         resstrs=self.cursor.fetchall()
-        resarray = np.zeros([len(resstrs), self.feature_length])
+        resarray = np.zeros([len(resstrs), self.feature_length], dtype=np.float32)
         # print(np.shape(resarray))
         # print(type(eval(resstrs[0][0])))
         for idx, resstr in enumerate(resstrs):
             # 我这边不能直接将列表转换为Numpy Array
             resarray[idx,:] = np.array(eval(resstr[0]), dtype = np.float32)
-        return resarray
+        return np.array(resarray, dtype = np.float32)
     
     def query_list_data(self, data_list):
         sql = "SELECT `video_name` FROM {table} WHERE video_id in ({seq})".format(table=self.datatable,
@@ -87,8 +87,8 @@ if __name__ == '__main__':
     fp.close()
     print(config['videobase'])
     with Videosql(config['videobase']) as videosql:
-        # video_db = videosql.get_all_feature()
-        # print(video_db.shape)
-        index_list = [1,2,3]
-        videosql.query_list_data(index_list)
+        video_db = videosql.get_all_feature()
+        print(video_db.dtype)
+        # index_list = [1,2,3]
+        # videosql.query_list_data(index_list)
         print("初始化数据库配置")

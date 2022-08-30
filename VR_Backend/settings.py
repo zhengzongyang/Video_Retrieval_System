@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import json
+import os
 
 """
 导入全局的配置文件
@@ -28,6 +29,8 @@ from VR_APP.dao.Videosql import Videosql
 with Videosql(config['videobase']) as videosql:
     video_db = videosql.get_all_feature()
     print("初始化数据库配置")
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,6 +84,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media'#### add here
             ],
         },
     },
@@ -134,7 +138,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+# MEDIA_URL = '/CLIP2Video/features/'
+STATICFILES_DIRS = [
+    '/root/CLIP2Video/features',
+    '/root/dataset/data/MSRVTT_Videos'
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

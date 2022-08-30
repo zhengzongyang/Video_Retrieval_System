@@ -1,0 +1,59 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>检索结果</title>
+</head>
+<body>
+    <table align="center" border="1" width="300" height="300" cellspacing="0">
+        <tr>
+            <th>视频名称</th>
+            <th>视频图片</th>
+        </tr>
+        <tr>
+            <td>{{recommend_list.0}}</td>
+            <td>
+                <video width="320" height="240" controls>
+                    <source src="/static/{{recommend_list.0}}.mp4" type="video/mp4">
+                </video>
+            </td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>{{recommend_list.1}}</td>
+            <td>
+                <video width="320" height="240" controls>
+                    <source src="/static/{{recommend_list.1}}.mp4" type="video/mp4">
+                </video>
+            </td>
+        </tr>
+        <tr>
+            <td>{{recommend_list.2}}</td>
+            <td>
+                <video width="320" height="240" controls>
+                    <source src="/static/{{recommend_list.2}}.mp4" type="video/mp4">
+                </video>
+            </td>
+        </tr>
+        <tr>
+            <td>{{recommend_list.3}}</td>
+            <td>
+                <video width="320" height="240" controls>
+                    <source src="/static/{{recommend_list.3}}.mp4" type="video/mp4">
+                </video>
+            </td>
+        </tr>
+        <tr>
+            <td>{{recommend_list.4}}</td>
+            <td>
+                <video width="320" height="240" controls>
+                    <source src="/static/{{recommend_list.4}}.mp4" type="video/mp4">
+                </video>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
