@@ -6,6 +6,7 @@ from VR_APP.preload import tokenizer, encoder, args
 from VR_Backend.settings import config, UPLOAD_PATH
 from VR_APP.dao.Videosql import Videosql
 import faiss
+import time
 
 
 
@@ -101,9 +102,10 @@ class VideoService():
     得到的跨模态特征在数据库中查询匹配视频
     """
     def match(self, feature, video_db, rank):
+        res_data = {}
         video_cnt, feat_dim = video_db.shape
         # 与特征库特征矩阵进行点乘计算相似度
-        match_result = video_db.dot(feature.T).reshape(1, video_cnt)
+        match_result = video_db.dot(feature.T).reshape(1, video_cnt)*100
         match_result_softmax = self.softmax(match_result)
 
         # 对得分大小进行排序，得分从小到大
@@ -115,27 +117,56 @@ class VideoService():
 
         # 根据查出来的视频索引信息，去数据库中查对应的视频信息
         with Videosql(config['videobase']) as videosql:
-            result = videosql.query_list_data(query_index_list)
-            
-        return result
-
+            video_list = videosql.query_list_data(query_index_list)
+        sim_list = [match_result_softmax[0][x] for x in selectIndex]
+        res_data["video_list"] = video_list
+        res_data["sim_list"] = sim_list
+        print(sim_list)   
+        print(video_list)
+        return res_data
+    """
+    将距离转化为相似度
+    """
+    def calc_similarity(self, dis):
+        sum = 0
+        for d in dis:
+            sum += d
+        sim = []
+        for d in dis:
+            sim.append(round(d / sum, 3))
+        return sim
+    
     def match_faiss(self, feature, rank):
+        res_data = {}
         D, I = self.index.search(feature, rank)
-        query_index_list = I[:rank][0] + 1
+        # 放大差距，为softmax做准备
+        D = D * 50
+        sim_list = self.softmax(D)[0].tolist()
+        # 保留小数点后5位
+        sim_list = [round(x, 5) for x in sim_list]
+        # print(sim_list)
+        # sim_list = self.calc_similarity(D[:rank][0])
+        # 这里返回的类型是numpy array
+        query_index_list = (I[:rank][0] + 1).tolist()
         print("faiss_index.....")
         # 根据查出来的视频索引信息，去数据库中查对应的视频信息
         with Videosql(config['videobase']) as videosql:
-            result = videosql.query_list_data(query_index_list)
-        
-        return result
+            video_list = videosql.query_list_data(query_index_list)
+        res_data["id_list"] = query_index_list
+        res_data["video_list"] = video_list
+        res_data["sim_list"] = sim_list
+        return res_data
         
 
     def text2video_query(self, caption, video_db, rank=5):
+        start = time.time()
         # 获取文本编码器
         text_encoder = encoder
         text_feat = self.get_overall_text_feature(text_encoder, tokenizer, caption)
         # result = self.match(text_feat, video_db, rank)
         result = self.match_faiss(text_feat, rank)
+        end = time.time()
+        print(end - start)
         return result
 
 

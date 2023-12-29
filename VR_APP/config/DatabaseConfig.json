@@ -6,5 +6,13 @@
         "password": "LTZmysql",
         "database": "media_manage",
         "datatable": "video_0709"
+    },
+    "videotest":{
+        "host": "10.129.2.158",
+        "port": "12521",
+        "user": "root",
+        "password": "LTZmysql",
+        "database": "media_manage",
+        "datatable": "video_1004"
     }
 }

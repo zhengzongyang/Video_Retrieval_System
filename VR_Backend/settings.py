@@ -141,7 +141,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 # MEDIA_URL = '/CLIP2Video/features/'
 STATICFILES_DIRS = [
-    '/root/CLIP2Video/features',
+    '/root/Projects/CLIP2Video/features',
     '/root/dataset/data/MSRVTT_Videos'
 ]
 

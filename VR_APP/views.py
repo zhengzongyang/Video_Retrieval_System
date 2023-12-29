@@ -38,8 +38,8 @@ def upload_file(request):
                         f.write(chunk)
 
                 # video_service = VideoService()
-                recommend_list = video_service.video2video_query(file_name, video_db)
-                recommend = {"recommend_list": recommend_list}
+                res_data = video_service.video2video_query(file_name, video_db)
+                recommend = {"recommend_list": res_data["video_list"]}
                 # return HttpResponse(json.dumps(recommend, indent=4, ensure_ascii=False))
                 return render(request, 'VR_APP/result.html', recommend)
             else:
@@ -57,8 +57,9 @@ def query(request):
         if caption != None and caption.strip() != "":
             # 构建视频服务
             # video_service = VideoService()
-            recommend_list = video_service.text2video_query(caption, video_db)
-        recommend = {"recommend_list": recommend_list}
+            res_data = video_service.text2video_query(caption, video_db)
+        recommend = {"recommend_list": res_data["video_list"]}
+        print(recommend)
         # return HttpResponse(json.dumps(recommend, indent=4, ensure_ascii=False))
         return render(request, 'VR_APP/result.html', recommend)
 
@@ -78,10 +79,15 @@ def file_download(request, file_name):
 def test_caption_query(request):
     if request.method == "POST":
         request_json = json.loads(request.body)
-        print(request.json)
+        print(request_json)
         caption = request_json.get("caption")
         if caption != None and caption.strip() != "":
-            recommend_list = video_service.text2video_query(caption, video_db)
-            
-    return HttpResponse("ok")
+            rank = request_json.get("rank")
+            res_data = video_service.text2video_query(caption, video_db, rank)
+            path_list = ["/root/dataset/data/MSRVTT_Videos" + x + ".mp4" for x in res_data["video_list"]]
+            res_data["path_list"] = path_list
+            response_json = json.dumps(res_data, indent=4)
+            return HttpResponse(response_json)
+    
+    return HttpResponse("error")
     

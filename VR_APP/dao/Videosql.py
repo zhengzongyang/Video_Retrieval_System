@@ -59,7 +59,7 @@ class Videosql():
         self.cursor.execute(sql)
         resstrs=self.cursor.fetchall()
         resarray = np.zeros([len(resstrs), self.feature_length], dtype=np.float32)
-        # print(np.shape(resarray))
+        print(np.shape(resarray))
         # print(type(eval(resstrs[0][0])))
         for idx, resstr in enumerate(resstrs):
             # 我这边不能直接将列表转换为Numpy Array
